@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>ClassTech</title>
+    <title>DJHS Engineering Tracker</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -425,8 +425,8 @@
     <div class="app-container">
         <div class="sidebar">
             <div class="app-header">
-                <div class="app-title">ClassTech</div>
-                <div class="app-subtitle">Engineering Manager</div>
+                <div class="app-title">DJHS Engineering</div>
+                <div class="app-subtitle">Tracker</div>
             </div>
             <div class="nav-menu">
                 <div class="nav-item active" data-section="dashboard">📊 Dashboard</div>
@@ -444,7 +444,10 @@
             <div class="content-section active" id="dashboard">
                 <div class="section-header">
                     <h1 class="section-title">Dashboard</h1>
-                    <button class="btn btn-secondary" id="exportBtn">📥 Export</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-secondary" id="importBtn">📤 Import</button>
+                        <button class="btn btn-secondary" id="exportBtn">📥 Export</button>
+                    </div>
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
                     <div class="stat-card">
@@ -1439,7 +1442,46 @@
                 updateDashboard();
             }
         }
-
+        document.getElementById('importBtn').addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        
+                        // Confirm before overwriting
+                        if (!confirm('This will replace ALL current data. Are you sure? (Make sure you exported your current data first!)')) {
+                            return;
+                        }
+                        
+                        // Import all data
+                        if (data.students) store.set('students', data.students);
+                        if (data.teams) store.set('teams', data.teams);
+                        if (data.attendance) store.set('attendance', data.attendance);
+                        if (data.assignments) store.set('assignments', data.assignments);
+                        if (data.skills) store.set('skills', data.skills);
+                        if (data.certifications) store.set('certifications', data.certifications);
+                        if (data.checkouts) store.set('checkouts', data.checkouts);
+                        
+                        alert('Data imported successfully! Refreshing...');
+                        location.reload();
+                    } catch (error) {
+                        alert('Error importing file. Make sure it\'s a valid ClassTech export file.');
+                        console.error(error);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        });
         document.getElementById('exportBtn').addEventListener('click', () => {
             const data = {
                 students: store.get('students'),
