@@ -499,7 +499,7 @@
                     <thead>
                         <tr>
                             <th>Name</th>
-                            <th>Periods</th>
+                            <th>HOME PERIOD</th>
                             <th>Team</th>
                             <th>Attendance</th>
                             <th>Actions</th>
@@ -982,6 +982,7 @@
             document.getElementById('addStudentForm').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const students = store.get('students') || [];
+                
                 students.push({
                     id: Date.now().toString(),
                     name: document.getElementById('studentName').value,
