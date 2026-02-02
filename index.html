@@ -644,12 +644,10 @@
             let totalSlots = 0;
             
             students.forEach(s => {
-                s.periods.forEach(period => {
-                    totalSlots++;
-                    if (todayAtt[`${s.id}_${period}`] === 'present') {
-                        totalPresent++;
-                    }
-                });
+                totalSlots++;
+                if (todayAtt[`${s.id}_${currentPeriod}`] === 'present') {
+                    totalPresent++;
+                }
             });
             
             const rate = totalSlots > 0 ? Math.round((totalPresent / totalSlots) * 100) : 0;
@@ -682,8 +680,8 @@
             const today = new Date().toISOString().split('T')[0];
             const todayAtt = attendance[today] || {};
             
-            // Filter students who have the current period
-            const periodStudents = students.filter(s => s.periods.includes(currentPeriod));
+            // Show ALL students in every period (they can drop in anytime)
+            const periodStudents = students;
             
             const grid = document.getElementById('attendanceGrid');
             grid.innerHTML = periodStudents.map(s => {
@@ -725,17 +723,15 @@
             tbody.innerHTML = students.map(s => {
                 const team = teams.find(t => t.id === s.team);
                 
-                // Calculate attendance across all periods
+                // Calculate attendance for home period only
                 let totalSlots = 0;
                 let presentCount = 0;
                 
                 Object.keys(attendance).forEach(date => {
-                    s.periods.forEach(period => {
-                        totalSlots++;
-                        if (attendance[date][`${s.id}_${period}`] === 'present') {
-                            presentCount++;
-                        }
-                    });
+                    totalSlots++;
+                    if (attendance[date][`${s.id}_${s.homePeriod}`] === 'present') {
+                        presentCount++;
+                    }
                 });
                 
                 const rate = totalSlots > 0 ? Math.round((presentCount / totalSlots) * 100) : 0;
@@ -743,7 +739,7 @@
                 return `
                     <tr>
                         <td><strong>${s.name}</strong></td>
-                        <td>${s.periods.map(p => p === 'Wildcat Period' ? 'WP' : p.replace('Period ', 'P')).join(', ')}</td>
+                        <td>${s.homePeriod === 'Wildcat Period' ? 'WP' : s.homePeriod.replace('Period ', 'P')}</td>
                         <td>${team ? team.name : '-'}</td>
                         <td><span class="badge badge-${rate >= 90 ? 'success' : rate >= 75 ? 'warning' : 'danger'}">${rate}%</span></td>
                         <td>
@@ -852,7 +848,7 @@
             }
             
             tbody.innerHTML = assignments.map(a => {
-                const periodStudents = students.filter(s => s.periods.includes(a.period));
+                const periodStudents = students.filter(s => s.homePeriod === a.period);
                 const submitted = a.submissions ? Object.values(a.submissions).filter(s => s).length : 0;
                 
                 return `
@@ -952,7 +948,7 @@
             
             if (!attendance[today]) attendance[today] = {};
             
-            students.filter(s => s.periods.includes(currentPeriod)).forEach(s => {
+            students.forEach(s => {
                 const key = `${s.id}_${currentPeriod}`;
                 attendance[today][key] = 'present';
             });
@@ -974,15 +970,10 @@
                         <input type="text" class="form-input" id="studentName" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Select Periods (check all that apply)</label>
-                        <div class="checkbox-list">
-                            ${PERIODS.map(p => `
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="period_${p}" value="${p}">
-                                    <label for="period_${p}">${p}</label>
-                                </div>
-                            `).join('')}
-                        </div>
+                        <label class="form-label">Home Period (assigned class)</label>
+                        <select class="form-select" id="studentHomePeriod" required>
+                            ${PERIODS.map(p => `<option value="${p}">${p}</option>`).join('')}
+                        </select>
                     </div>
                     <button type="submit" class="btn btn-primary" style="width: 100%;">Add Student</button>
                 </form>
@@ -991,17 +982,10 @@
             document.getElementById('addStudentForm').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const students = store.get('students') || [];
-                const selectedPeriods = Array.from(document.querySelectorAll('.checkbox-item input:checked')).map(cb => cb.value);
-                
-                if (selectedPeriods.length === 0) {
-                    alert('Please select at least one period');
-                    return;
-                }
-                
                 students.push({
                     id: Date.now().toString(),
                     name: document.getElementById('studentName').value,
-                    periods: selectedPeriods,
+                    homePeriod: document.getElementById('studentHomePeriod').value,
                     team: null
                 });
                 store.set('students', students);
@@ -1028,15 +1012,10 @@
                         <input type="text" class="form-input" id="editStudentName" value="${student.name}" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Select Periods (check all that apply)</label>
-                        <div class="checkbox-list">
-                            ${PERIODS.map(p => `
-                                <div class="checkbox-item">
-                                    <input type="checkbox" id="editperiod_${p}" value="${p}" ${student.periods.includes(p) ? 'checked' : ''}>
-                                    <label for="editperiod_${p}">${p}</label>
-                                </div>
-                            `).join('')}
-                        </div>
+                        <label class="form-label">Home Period (assigned class)</label>
+                        <select class="form-select" id="editStudentHomePeriod" required>
+                            ${PERIODS.map(p => `<option value="${p}" ${student.homePeriod === p ? 'selected' : ''}>${p}</option>`).join('')}
+                        </select>
                     </div>
                     <button type="submit" class="btn btn-primary" style="width: 100%;">Save Changes</button>
                 </form>
@@ -1044,15 +1023,9 @@
             
             document.getElementById('editStudentForm').addEventListener('submit', (e) => {
                 e.preventDefault();
-                const selectedPeriods = Array.from(document.querySelectorAll('.checkbox-item input:checked')).map(cb => cb.value);
-                
-                if (selectedPeriods.length === 0) {
-                    alert('Please select at least one period');
-                    return;
-                }
                 
                 student.name = document.getElementById('editStudentName').value;
-                student.periods = selectedPeriods;
+                student.homePeriod = document.getElementById('editStudentHomePeriod').value;
                 store.set('students', students);
                 closeModal();
                 renderAttendance();
@@ -1060,7 +1033,6 @@
                 updateDashboard();
             });
         }
-
         function deleteStudent(id) {
             if (!confirm('Are you sure you want to delete this student? This will remove all their data.')) return;
             
@@ -1303,7 +1275,7 @@
             const assignment = assignments.find(a => a.id === id);
             if (!assignment) return;
             
-            const periodStudents = students.filter(s => s.periods.includes(assignment.period));
+            const periodStudents = students.filter(s => s.homePeriod === assignment.period);
             
             showModal(`
                 <div class="modal-header">
