@@ -606,6 +606,60 @@
 
         store.init();
 
+        // ADD STUDENT — Students tab only
+        document.getElementById('addStudentBtn').addEventListener('click', () => {
+            showModal(`
+                <div class="modal-header">
+                    <div class="modal-title">Add Student</div>
+                    <button class="close-btn" onclick="closeModal()">✕</button>
+                </div>
+                <form id="addStudentForm">
+                    <div class="form-group">
+                        <label class="form-label">Student Name</label>
+                        <input type="text" class="form-input" id="studentName" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Home Period</label>
+                        <select class="form-select" id="studentHomePeriod" required>
+                            ${PERIODS.map(p => `<option value="${p}">${p}</option>`).join('')}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        Add Student
+                    </button>
+                </form>
+            `);
+        
+            document.getElementById('addStudentForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+        
+                const students = store.get('students') || [];
+                const name = document.getElementById('studentName').value.trim();
+                const homePeriod = document.getElementById('studentHomePeriod').value;
+        
+                // Prevent duplicate names (case-insensitive)
+                if (students.some(s => s.name.toLowerCase() === name.toLowerCase())) {
+                    alert('A student with this name already exists.');
+                    return;
+                }
+        
+                students.push({
+                    id: crypto.randomUUID(),
+                    name,
+                    homePeriod,
+                    team: null
+                });
+        
+                store.set('students', students);
+                closeModal();
+        
+                // Re-render dependent views
+                renderStudents();
+                renderAttendance();
+                updateDashboard();
+            });
+        });
+        
         // Navigation
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {
@@ -619,14 +673,16 @@
         });
 
         function refresh(section) {
-            if (section === 'dashboard') updateDashboard();
-            if (section === 'attendance') renderAttendance();
-            if (section === 'students') renderStudents();
-            if (section === 'teams') renderTeams();
-            if (section === 'skills') renderSkills();
-            if (section === 'assignments') renderAssignments();
-            if (section === 'certifications') renderCertifications();
-            if (section === 'checkout') renderCheckouts();
+            requestAnimationFrame(() => {
+                if (section === 'dashboard') updateDashboard();
+                if (section === 'attendance') renderAttendance();
+                if (section === 'students') renderStudents();
+                if (section === 'teams') renderTeams();
+                if (section === 'skills') renderSkills();
+                if (section === 'assignments') renderAssignments();
+                if (section === 'certifications') renderCertifications();
+                if (section === 'checkout') renderCheckouts();
+            });
         }
 
         function updateDashboard() {
