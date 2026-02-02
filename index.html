@@ -474,7 +474,6 @@
                     <h1 class="section-title">Attendance</h1>
                     <div>
                         <button class="btn btn-secondary" id="markAllBtn">Mark All Present</button>
-                        <button class="btn btn-primary" id="addStudentBtn">➕ Add Student</button>
                     </div>
                 </div>
                 
@@ -494,6 +493,7 @@
             <div class="content-section" id="students">
                 <div class="section-header">
                     <h1 class="section-title">Students</h1>
+                    <button class="btn btn-primary" id="addStudentBtn">➕ Add Student</button>
                 </div>
                 <table class="data-table">
                     <thead>
@@ -792,14 +792,14 @@
             const select = document.getElementById('skillsStudentSelect');
             
             // Populate select
-            if (select.options.length === 1) {
-                students.forEach(s => {
-                    const opt = document.createElement('option');
-                    opt.value = s.id;
-                    opt.textContent = s.name;
-                    select.appendChild(opt);
-                });
-            }
+            select.innerHTML = '<option value="">Select student...</option>';
+            students.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = s.name;
+                select.appendChild(opt);
+            });
+
             
             const selectedId = select.value;
             const container = document.getElementById('skillsContainer');
@@ -871,14 +871,14 @@
             const select = document.getElementById('certStudentSelect');
             
             // Populate select
-            if (select.options.length === 1) {
-                students.forEach(s => {
-                    const opt = document.createElement('option');
-                    opt.value = s.id;
-                    opt.textContent = s.name;
-                    select.appendChild(opt);
-                });
-            }
+            select.innerHTML = '<option value="">Select student...</option>';
+            students.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = s.name;
+                select.appendChild(opt);
+            });
+
             
             const selectedId = select.value;
             const container = document.getElementById('certContainer');
@@ -956,45 +956,6 @@
             store.set('attendance', attendance);
             renderAttendance();
             updateDashboard();
-        });
-
-        document.getElementById('addStudentBtn').addEventListener('click', () => {
-            showModal(`
-                <div class="modal-header">
-                    <div class="modal-title">Add Student</div>
-                    <button class="close-btn" onclick="closeModal()">✕</button>
-                </div>
-                <form id="addStudentForm">
-                    <div class="form-group">
-                        <label class="form-label">Student Name</label>
-                        <input type="text" class="form-input" id="studentName" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Home Period (assigned class)</label>
-                        <select class="form-select" id="studentHomePeriod" required>
-                            ${PERIODS.map(p => `<option value="${p}">${p}</option>`).join('')}
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%;">Add Student</button>
-                </form>
-            `);
-            
-            document.getElementById('addStudentForm').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const students = store.get('students') || [];
-                
-                students.push({
-                    id: Date.now().toString(),
-                    name: document.getElementById('studentName').value,
-                    homePeriod: document.getElementById('studentHomePeriod').value,
-                    team: null
-                });
-                store.set('students', students);
-                closeModal();
-                renderAttendance();
-                renderStudents();
-                updateDashboard();
-            });
         });
 
         function editStudent(id) {
