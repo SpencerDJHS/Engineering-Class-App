@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>ClassTech</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #ff6b35;
+            --primary-dark: #e55a2b;
+            --secondary: #004e89;
+            --accent: #ffc857;
+            --bg-dark: #1a1a2e;
+            --bg-medium: #16213e;
+            --bg-light: #0f3460;
+            --text-light: #e8f1f5;
+            --text-dim: #a8b5c8;
+            --success: #06ffa5;
+            --warning: #ffc857;
+            --danger: #ff006e;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-medium) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .app-container { display: flex; height: 100vh; }
+
+        .sidebar {
+            width: 280px;
+            background: var(--bg-medium);
+            border-right: 2px solid var(--bg-light);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 20px var(--shadow);
+        }
+
+        .app-header {
+            padding: 30px 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        }
+
+        .app-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .app-subtitle {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .nav-menu {
+            flex: 1;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            font-size: 15px;
+            color: var(--text-dim);
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 107, 53, 0.1);
+            color: var(--text-light);
+        }
+
+        .nav-item.active {
+            background: rgba(255, 107, 53, 0.15);
+            color: var(--primary);
+            border-left-color: var(--primary);
+            font-weight: 600;
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px 40px;
+        }
+
+        .content-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--bg-light);
+        }
+
+        .section-title {
+            font-size: 32px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'DM Sans', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-light);
+            color: var(--text-light);
+        }
+
+        .btn-secondary:hover {
+            background: var(--secondary);
+        }
+
+        .stat-card {
+            background: var(--bg-medium);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--bg-light);
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        .attendance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+        }
+
+        .student-tile {
+            background: var(--bg-light);
+            border-radius: 10px;
+            padding: 16px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+
+        .student-tile:hover {
+            transform: scale(1.05);
+        }
+
+        .student-tile.present {
+            background: rgba(6, 255, 165, 0.15);
+            border-color: var(--success);
+        }
+
+        .student-tile.absent {
+            background: rgba(255, 0, 110, 0.15);
+            border-color: var(--danger);
+        }
+
+        .student-tile.late {
+            background: rgba(255, 200, 87, 0.15);
+            border-color: var(--warning);
+        }
+
+        .student-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            margin: 0 auto 8px;
+            color: white;
+        }
+
+        .student-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-medium);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--bg-light);
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .close-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: var(--bg-light);
+            color: var(--text-light);
+            font-size: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-light);
+            border: 1px solid var(--bg-light);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 14px;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-medium);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .data-table thead {
+            background: var(--bg-light);
+        }
+
+        .data-table th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        .data-table td {
+            padding: 16px;
+            border-top: 1px solid var(--bg-light);
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .badge-success {
+            background: rgba(6, 255, 165, 0.2);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(255, 200, 87, 0.2);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background: rgba(255, 0, 110, 0.2);
+            color: var(--danger);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-dim);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="app-header">
+                <div class="app-title">ClassTech</div>
+                <div class="app-subtitle">Engineering Manager</div>
+            </div>
+            <div class="nav-menu">
+                <div class="nav-item active" data-section="dashboard">📊 Dashboard</div>
+                <div class="nav-item" data-section="attendance">✓ Attendance</div>
+                <div class="nav-item" data-section="teams">👥 Teams</div>
+                <div class="nav-item" data-section="students">🎓 Students</div>
+                <div class="nav-item" data-section="skills">⚡ Skills</div>
+                <div class="nav-item" data-section="assignments">📝 Assignments</div>
+                <div class="nav-item" data-section="certifications">🛡️ Safety Certs</div>
+                <div class="nav-item" data-section="checkout">🔧 Tool Checkout</div>
+                <div class="nav-item" data-section="iterations">🔄 Design Iterations</div>
+                <div class="nav-item" data-section="evaluations">⭐ Peer Evals</div>
+                <div class="nav-item" data-section="standards">📐 Standards</div>
+                <div class="nav-item" data-section="portfolio">📸 Portfolio</div>
+                <div class="nav-item" data-section="scheduling">📅 Lab Schedule</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="content-section active" id="dashboard">
+                <div class="section-header">
+                    <h1 class="section-title">Dashboard</h1>
+                    <button class="btn btn-secondary" id="exportBtn">📥 Export</button>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalStudents">0</div>
+                        <div class="stat-label">TOTAL STUDENTS</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="activeTeams">0</div>
+                        <div class="stat-label">ACTIVE TEAMS</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="todayAttendance">0%</div>
+                        <div class="stat-label">TODAY'S ATTENDANCE</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="checkedOutTools">0</div>
+                        <div class="stat-label">TOOLS CHECKED OUT</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-section" id="attendance">
+                <div class="section-header">
+                    <h1 class="section-title">Attendance</h1>
+                    <div>
+                        <button class="btn btn-secondary" id="markAllBtn">Mark All Present</button>
+                        <button class="btn btn-primary" id="addStudentBtn">➕ Add Student</button>
+                    </div>
+                </div>
+                <div class="attendance-grid" id="attendanceGrid"></div>
+            </div>
+
+            <div class="content-section" id="teams">
+                <div class="section-header">
+                    <h1 class="section-title">Teams</h1>
+                    <button class="btn btn-primary" id="addTeamBtn">➕ Create Team</button>
+                </div>
+                <div id="teamsContainer"></div>
+            </div>
+
+            <div class="content-section" id="students">
+                <div class="section-header">
+                    <h1 class="section-title">Students</h1>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Class Period</th>
+                            <th>Team</th>
+                            <th>Attendance</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTable"></tbody>
+                </table>
+            </div>
+
+            <div class="content-section" id="skills">
+                <div class="section-header">
+                    <h1 class="section-title">Skills Assessment</h1>
+                    <button class="btn btn-primary" id="addSkillBtn">➕ Add Skill</button>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <select class="form-select" id="skillsStudentSelect" style="max-width: 300px;">
+                        <option value="">Select student...</option>
+                    </select>
+                </div>
+                <div id="skillsContainer"></div>
+            </div>
+
+            <div class="content-section" id="assignments">
+                <div class="section-header">
+                    <h1 class="section-title">Assignments</h1>
+                    <button class="btn btn-primary" id="addAssignmentBtn">➕ Create Assignment</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Assignment</th>
+                            <th>Due Date</th>
+                            <th>Submitted</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assignmentsTable"></tbody>
+                </table>
+            </div>
+
+            <div class="content-section" id="certifications">
+                <div class="section-header">
+                    <h1 class="section-title">Safety Certifications</h1>
+                    <button class="btn btn-primary" id="addCertBtn">➕ Add Cert</button>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <select class="form-select" id="certStudentSelect" style="max-width: 300px;">
+                        <option value="">Select student...</option>
+                    </select>
+                </div>
+                <div id="certContainer"></div>
+            </div>
+
+            <div class="content-section" id="checkout">
+                <div class="section-header">
+                    <h1 class="section-title">Tool Checkout</h1>
+                    <button class="btn btn-primary" id="checkoutBtn">🔧 Checkout Tool</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Tool</th>
+                            <th>Student</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="checkoutTable"></tbody>
+                </table>
+            </div>
+
+            <div class="content-section" id="iterations">
+                <div class="section-header">
+                    <h1 class="section-title">Design Iterations</h1>
+                    <button class="btn btn-primary" id="addIterationBtn">➕ Log Iteration</button>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <select class="form-select" id="iterationTeamSelect" style="max-width: 300px;">
+                        <option value="">Select team...</option>
+                    </select>
+                </div>
+                <div id="iterationsContainer"></div>
+            </div>
+
+            <div class="content-section" id="evaluations">
+                <div class="section-header">
+                    <h1 class="section-title">Peer Evaluations</h1>
+                    <button class="btn btn-primary" id="addEvalBtn">➕ Add Evaluation</button>
+                </div>
+                <div id="evalsContainer"></div>
+            </div>
+
+            <div class="content-section" id="standards">
+                <div class="section-header">
+                    <h1 class="section-title">Engineering Standards</h1>
+                    <button class="btn btn-primary" id="addStandardBtn">➕ Add Standard</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Description</th>
+                            <th>Activities</th>
+                        </tr>
+                    </thead>
+                    <tbody id="standardsTable"></tbody>
+                </table>
+            </div>
+
+            <div class="content-section" id="portfolio">
+                <div class="section-header">
+                    <h1 class="section-title">Portfolio</h1>
+                    <button class="btn btn-primary" id="uploadPhotoBtn">📸 Upload Photo</button>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <select class="form-select" id="portfolioStudentSelect" style="max-width: 300px;">
+                        <option value="">Select student...</option>
+                    </select>
+                </div>
+                <div id="portfolioContainer"></div>
+            </div>
+
+            <div class="content-section" id="scheduling">
+                <div class="section-header">
+                    <h1 class="section-title">Lab Scheduling</h1>
+                    <button class="btn btn-primary" id="scheduleBtn">➕ Schedule Equipment</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Equipment</th>
+                            <th>User</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content" id="modalContent"></div>
+    </div>
+
+    <script>
+        // Storage using localStorage
+        const store = {
+            get(key) {
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : null;
+            },
+            set(key, value) {
+                localStorage.setItem(key, JSON.stringify(value));
+            },
+            init() {
+                if (!this.get('students')) this.set('students', []);
+                if (!this.get('teams')) this.set('teams', []);
+                if (!this.get('attendance')) this.set('attendance', {});
+                if (!this.get('assignments')) this.set('assignments', []);
+                if (!this.get('skills')) this.set('skills', []);
+                if (!this.get('certifications')) this.set('certifications', {});
+                if (!this.get('checkouts')) this.set('checkouts', []);
+                if (!this.get('iterations')) this.set('iterations', []);
+                if (!this.get('evaluations')) this.set('evaluations', []);
+                if (!this.get('standards')) this.set('standards', []);
+                if (!this.get('portfolio')) this.set('portfolio', {});
+                if (!this.get('schedule')) this.set('schedule', []);
+            }
+        };
+
+        store.init();
+
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const section = item.dataset.section;
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+                document.getElementById(section).classList.add('active');
+                refresh(section);
+            });
+        });
+
+        function refresh(section) {
+            if (section === 'dashboard') updateDashboard();
+            if (section === 'attendance') renderAttendance();
+            if (section === 'students') renderStudents();
+            if (section === 'teams') renderTeams();
+        }
+
+        function updateDashboard() {
+            const students = store.get('students') || [];
+            const teams = store.get('teams') || [];
+            const checkouts = store.get('checkouts') || [];
+            const attendance = store.get('attendance') || {};
+            
+            document.getElementById('totalStudents').textContent = students.length;
+            document.getElementById('activeTeams').textContent = teams.length;
+            
+            const today = new Date().toISOString().split('T')[0];
+            const todayAtt = attendance[today] || {};
+            const present = Object.values(todayAtt).filter(s => s === 'present').length;
+            const rate = students.length > 0 ? Math.round((present / students.length) * 100) : 0;
+            document.getElementById('todayAttendance').textContent = rate + '%';
+            
+            const out = checkouts.filter(c => !c.returned).length;
+            document.getElementById('checkedOutTools').textContent = out;
+        }
+
+        function renderAttendance() {
+            const students = store.get('students') || [];
+            const attendance = store.get('attendance') || {};
+            const today = new Date().toISOString().split('T')[0];
+            const todayAtt = attendance[today] || {};
+            
+            const grid = document.getElementById('attendanceGrid');
+            grid.innerHTML = students.map(s => `
+                <div class="student-tile ${todayAtt[s.id] || ''}" onclick="toggleAttendance('${s.id}')">
+                    <div class="student-avatar">${s.name.charAt(0)}</div>
+                    <div class="student-name">${s.name}</div>
+                </div>
+            `).join('');
+        }
+
+        function toggleAttendance(id) {
+            const attendance = store.get('attendance') || {};
+            const today = new Date().toISOString().split('T')[0];
+            if (!attendance[today]) attendance[today] = {};
+            
+            const current = attendance[today][id] || '';
+            if (current === '') attendance[today][id] = 'present';
+            else if (current === 'present') attendance[today][id] = 'late';
+            else if (current === 'late') attendance[today][id] = 'absent';
+            else delete attendance[today][id];
+            
+            store.set('attendance', attendance);
+            renderAttendance();
+            updateDashboard();
+        }
+
+        function renderStudents() {
+            const students = store.get('students') || [];
+            const teams = store.get('teams') || [];
+            const attendance = store.get('attendance') || {};
+            
+            const tbody = document.getElementById('studentsTable');
+            tbody.innerHTML = students.map(s => {
+                const team = teams.find(t => t.id === s.team);
+                const days = Object.keys(attendance).length;
+                const present = Object.values(attendance).filter(d => d[s.id] === 'present').length;
+                const rate = days > 0 ? Math.round((present / days) * 100) : 0;
+                
+                return `
+                    <tr>
+                        <td><strong>${s.name}</strong></td>
+                        <td>${s.period}</td>
+                        <td>${team ? team.name : '-'}</td>
+                        <td><span class="badge badge-${rate >= 90 ? 'success' : rate >= 75 ? 'warning' : 'danger'}">${rate}%</span></td>
+                        <td>
+                            <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px; margin-right: 8px;" onclick="editStudent('${s.id}')">Edit</button>
+                            <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px; background: var(--danger);" onclick="deleteStudent('${s.id}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderTeams() {
+            const teams = store.get('teams') || [];
+            const students = store.get('students') || [];
+            const container = document.getElementById('teamsContainer');
+            
+            if (teams.length === 0) {
+                container.innerHTML = '<div class="empty-state">No teams yet</div>';
+                return;
+            }
+            
+            container.innerHTML = teams.map(t => {
+                const members = students.filter(s => s.team === t.id);
+                return `
+                    <div style="background: var(--bg-medium); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                        <div style="font-size: 20px; font-weight: 700; margin-bottom: 12px;">${t.name}</div>
+                        <div style="color: var(--text-dim);">${members.map(m => m.name).join(', ')}</div>
+                        <div style="margin-top: 12px;">
+                            <div style="background: var(--bg-light); height: 8px; border-radius: 4px; overflow: hidden;">
+                                <div style="background: linear-gradient(90deg, var(--primary), var(--accent)); height: 100%; width: ${t.progress || 0}%;"></div>
+                            </div>
+                            <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">${t.progress || 0}% Complete</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Button handlers
+        document.getElementById('markAllBtn').addEventListener('click', () => {
+            const students = store.get('students') || [];
+            const attendance = store.get('attendance') || {};
+            const today = new Date().toISOString().split('T')[0];
+            attendance[today] = {};
+            students.forEach(s => attendance[today][s.id] = 'present');
+            store.set('attendance', attendance);
+            renderAttendance();
+            updateDashboard();
+        });
+
+        document.getElementById('addStudentBtn').addEventListener('click', () => {
+            const modal = document.getElementById('modal');
+            const content = document.getElementById('modalContent');
+            content.innerHTML = `
+                <div class="modal-header">
+                    <div class="modal-title">Add Student</div>
+                    <button class="close-btn" onclick="closeModal()">✕</button>
+                </div>
+                <form id="addStudentForm">
+                    <div class="form-group">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-input" id="studentName" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Class Period</label>
+                        <input type="text" class="form-input" id="studentPeriod" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Add Student</button>
+                </form>
+            `;
+            modal.classList.add('active');
+            
+            document.getElementById('addStudentForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const students = store.get('students') || [];
+                students.push({
+                    id: Date.now().toString(),
+                    name: document.getElementById('studentName').value,
+                    period: document.getElementById('studentPeriod').value,
+                    team: null
+                });
+                store.set('students', students);
+                closeModal();
+                renderAttendance();
+                updateDashboard();
+            });
+        });
+
+        document.getElementById('addTeamBtn').addEventListener('click', () => {
+            const students = store.get('students') || [];
+            const modal = document.getElementById('modal');
+            const content = document.getElementById('modalContent');
+            content.innerHTML = `
+                <div class="modal-header">
+                    <div class="modal-title">Create Team</div>
+                    <button class="close-btn" onclick="closeModal()">✕</button>
+                </div>
+                <form id="addTeamForm">
+                    <div class="form-group">
+                        <label class="form-label">Team Name</label>
+                        <input type="text" class="form-input" id="teamName" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Project</label>
+                        <input type="text" class="form-input" id="teamProject">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Members</label>
+                        <div style="max-height: 200px; overflow-y: auto;">
+                            ${students.map(s => `
+                                <div style="padding: 8px;">
+                                    <input type="checkbox" id="student${s.id}" value="${s.id}">
+                                    <label for="student${s.id}">${s.name}</label>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Create Team</button>
+                </form>
+            `;
+            modal.classList.add('active');
+            
+            document.getElementById('addTeamForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const teams = store.get('teams') || [];
+                const allStudents = store.get('students') || [];
+                const teamId = Date.now().toString();
+                
+                teams.push({
+                    id: teamId,
+                    name: document.getElementById('teamName').value,
+                    project: document.getElementById('teamProject').value,
+                    progress: 0
+                });
+                
+                const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+                allStudents.forEach(s => {
+                    if (selected.includes(s.id)) s.team = teamId;
+                });
+                
+                store.set('teams', teams);
+                store.set('students', allStudents);
+                closeModal();
+                renderTeams();
+                updateDashboard();
+            });
+        });
+
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            const data = {
+                students: store.get('students'),
+                teams: store.get('teams'),
+                attendance: store.get('attendance'),
+                assignments: store.get('assignments'),
+                skills: store.get('skills'),
+                certifications: store.get('certifications'),
+                checkouts: store.get('checkouts'),
+                iterations: store.get('iterations'),
+                evaluations: store.get('evaluations'),
+                standards: store.get('standards'),
+                portfolio: store.get('portfolio'),
+                schedule: store.get('schedule')
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `classtech-data-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        });
+
+        function editStudent(id) {
+            const students = store.get('students') || [];
+            const student = students.find(s => s.id === id);
+            if (!student) return;
+            
+            const modal = document.getElementById('modal');
+            const content = document.getElementById('modalContent');
+            content.innerHTML = `
+                <div class="modal-header">
+                    <div class="modal-title">Edit Student</div>
+                    <button class="close-btn" onclick="closeModal()">✕</button>
+                </div>
+                <form id="editStudentForm">
+                    <div class="form-group">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-input" id="editStudentName" value="${student.name}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Class Period</label>
+                        <input type="text" class="form-input" id="editStudentPeriod" value="${student.period}" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Save Changes</button>
+                </form>
+            `;
+            modal.classList.add('active');
+            
+            document.getElementById('editStudentForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                student.name = document.getElementById('editStudentName').value;
+                student.period = document.getElementById('editStudentPeriod').value;
+                store.set('students', students);
+                closeModal();
+                renderAttendance();
+                renderStudents();
+                updateDashboard();
+            });
+        }
+
+        function deleteStudent(id) {
+            if (!confirm('Are you sure you want to delete this student? This will remove all their data.')) return;
+            
+            const students = store.get('students') || [];
+            const updated = students.filter(s => s.id !== id);
+            store.set('students', updated);
+            
+            renderAttendance();
+            renderStudents();
+            updateDashboard();
+        }
+
+                function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') closeModal();
+        });
+
+        // Initialize
+        updateDashboard();
+        renderAttendance();
+        renderStudents();
+        renderTeams();
+    </script>
+</body>
+</html>
