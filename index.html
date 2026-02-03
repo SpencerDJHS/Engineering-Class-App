@@ -784,8 +784,11 @@
                 let presentCount = 0;
                 
                 Object.keys(attendance).forEach(date => {
+                    const dayRecord = attendance[date];
+                    if (!dayRecord) return;
+                
                     totalSlots++;
-                    if (attendance[date][`${s.id}_${s.homePeriod}`] === 'present') {
+                    if (dayRecord[`${s.id}_${s.homePeriod}`] === 'present') {
                         presentCount++;
                     }
                 });
