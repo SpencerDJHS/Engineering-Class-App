@@ -661,15 +661,25 @@
         });
         
         // Navigation
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const section = item.dataset.section;
-                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-                document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-                document.getElementById(section).classList.add('active');
-                refresh(section);
-            });
+        document.querySelector('.nav-menu').addEventListener('click', (e) => {
+            const item = e.target.closest('.nav-item');
+            if (!item) return;
+        
+            const section = item.dataset.section;
+        
+            // Update nav highlighting
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+        
+            // Update visible content section
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            const target = document.getElementById(section);
+            target.classList.add('active');
+        
+            // Force a render after tab becomes visible
+            if (section === 'students') setTimeout(renderStudents, 0);
+            else if (section === 'attendance') setTimeout(renderAttendance, 0);
+            else refresh(section);
         });
 
         function refresh(section) {
@@ -1510,9 +1520,7 @@
 
         // Initialize
         updateDashboard();
-        renderAttendance();
-        renderStudents();
-        renderTeams();
+        renderAttendance(); // because dashboard starts active
     </script>
 </body>
 </html>
